@@ -33,24 +33,28 @@ class WebCrawler():
             
             soup = BeautifulSoup(response.text, "lxml")
             
-            new_urls = []
+            new_urls = set()
             for link in soup.find_all('a'):
                 anchor = link.attrs["href"] if "href" in link.attrs else ''
 
                 if anchor.startswith('/'):
                     local_link = base_url + anchor
                     self.internal_urls.add(local_link)
-                    new_urls.append(local_link)
-                elif strip_base in anchor:
-                    self.internal_urls.add(anchor)
-                    new_urls.append(anchor)
+                    new_urls.add(local_link)
                 elif not anchor.startswith('http'):
                     local_link = path + anchor
                     self.internal_urls.add(local_link)
-                    new_urls.append(local_link)
+                    new_urls.add(local_link)
+                elif strip_base in anchor[:30]: #must be found at start of url
+                    self.internal_urls.add(anchor)
+                    new_urls.add(anchor)
+                
                 else:
                     self.external_urls.add(anchor)
+                    
+            print(new_urls)
+            print("------------------")
             
-            for i in new_urls:
-                if i not in self.visited_urls:
+            for i in list(new_urls):
+                if i not in self.visited_urls and not i in self.waiting_urls:
                     self.waiting_urls.append(i)
