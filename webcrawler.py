@@ -69,7 +69,8 @@ class WebCrawler():
             print(new_urls)
             print("------------------")
             
-            for i in list(new_urls):
+            flat_list_new_urls = [item for sublist in new_urls for item in sublist]
+            for i in list(flat_list_new_urls):
                 if i not in self.visited_urls and not i in self.waiting_urls:
                     self.waiting_urls.append(i)
                     
