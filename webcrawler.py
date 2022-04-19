@@ -49,14 +49,13 @@ class WebCrawler():
             elif strip_base in anchor[:30]: #must be found at start of url
                 new_internal_urls.append(anchor)
                 new_waiting_urls.append(anchor)
-            
             else:
                 new_external_urls.append(anchor)
                 
         return [new_waiting_urls, new_internal_urls, new_external_urls, new_broken_urls]
     
-    def flatten_links(self, links):
-        return [item for sublist in links for item in sublist]
+    def flatten_list(self, listi):
+        return [item for sublist in listi for item in sublist]
         
     def crawl(self):
         while self.waiting_urls:
@@ -82,21 +81,21 @@ class WebCrawler():
             all_new_external_urls = [x[2] for x in new_urls]
             all_new_broken_urls = [x[3] for x in new_urls]
             
-            new_waiting_urls = self.flatten_links(all_new_waiting_urls)
-            new_internal_urls = self.flatten_links(all_new_internal_urls)
-            new_external_urls = self.flatten_links(all_new_external_urls)
-            new_broken_urls = self.flatten_links(all_new_broken_urls)
+            new_waiting_urls = self.flatten_list(all_new_waiting_urls)
+            new_internal_urls = self.flatten_list(all_new_internal_urls)
+            new_external_urls = self.flatten_list(all_new_external_urls)
+            new_broken_urls = self.flatten_list(all_new_broken_urls)
             
-            for item1 in new_internal_urls:
-                self.internal_urls.add(item1)
-            for item2 in new_external_urls:
-                self.external_urls.add(item2)
-            for item3 in new_broken_urls:
-                self.broken_urls.add(item3)
+            for i in new_internal_urls:
+                self.internal_urls.add(i)
+            for j in new_external_urls:
+                self.external_urls.add(j)
+            for k in new_broken_urls:
+                self.broken_urls.add(k)
             
-            for i in list(new_waiting_urls):
-                if i not in self.visited_urls and not i in self.waiting_urls:
-                    self.waiting_urls.append(i)
+            for url in list(new_waiting_urls):
+                if url not in self.visited_urls and not url in self.waiting_urls:
+                    self.waiting_urls.append(url)
                     
     def get_sitemap(self):
         sorted_sitemap = sorted(list(self.internal_urls))
@@ -105,3 +104,4 @@ class WebCrawler():
 if __name__ == "__main__":
     webc = WebCrawler('https://tomblomfield.com/')
     webc.crawl()
+    print(webc.get_sitemap())
