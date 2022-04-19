@@ -38,14 +38,14 @@ class WebCrawler():
             if anchor.startswith('/'):
                 local_link = base_url + anchor
                 self.internal_urls.add(local_link)
-                found_urls.add(local_link)
+                found_urls.append(local_link)
             elif not anchor.startswith('http'):
                 local_link = path + anchor
                 self.internal_urls.add(local_link)
-                found_urls.add(local_link)
+                found_urls.append(local_link)
             elif strip_base in anchor[:30]: #must be found at start of url
                 self.internal_urls.add(anchor)
-                found_urls.add(anchor)
+                found_urls.append(anchor)
             
             else:
                 self.external_urls.add(anchor)
@@ -77,3 +77,7 @@ class WebCrawler():
     def get_sitemap(self):
         sorted_sitemap = sorted(list(self.internal_urls))
         return sorted_sitemap
+    
+if __name__ == "__main__":
+    webc = WebCrawler('https://tomblomfield.com/')
+    webc.crawl()
