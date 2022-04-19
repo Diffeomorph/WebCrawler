@@ -7,6 +7,7 @@ import collections
 from urllib.parse import urlsplit
 import multiprocessing
 
+
 class WebCrawler():
     
     def __init__(self, start_url):
@@ -53,21 +54,18 @@ class WebCrawler():
         
     def crawl(self):
         while self.waiting_urls:
-            cur_url = self.waiting_urls.popleft()
-            self.visited_urls.add(cur_url)
-            new_urls = set()
-            
-            process_list = []
-            for i in range(6): #cores
-                p =  multiprocessing.Process(target= self.find_all_links)
-                p.start()
-                process_list.append(p)
-            
-            for process in process_list:
-                process.join()
-            
-            print(process_list)
-                    
+            j = 0
+            next_batch_urls = []
+            while j < 6 and self.waiting_urls: 
+                cur_url = self.waiting_urls.popleft()
+                self.visited_urls.add(cur_url)
+                next_batch_urls.append(cur_url)
+                j += 1
+                
+            pool = multiprocessing.Pool(6)
+            new_urls = pool.map(self.find_all_links, next_batch_urls)
+            pool.close()
+                                
             print(new_urls)
             print("------------------")
             
