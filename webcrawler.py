@@ -1,4 +1,5 @@
-##### WEB CRAWLER
+##### WEB CRAWLER ######
+
 from bs4 import BeautifulSoup
 import requests
 import requests.exceptions
@@ -58,3 +59,7 @@ class WebCrawler():
             for i in list(new_urls):
                 if i not in self.visited_urls and not i in self.waiting_urls:
                     self.waiting_urls.append(i)
+                    
+    def get_sitemap(self):
+        sorted_sitemap = sorted(list(self.internal_urls))
+        return sorted_sitemap
