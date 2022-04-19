@@ -19,7 +19,10 @@ class WebCrawler():
         
     def find_all_links(self, cur_url):
         new_waiting_urls = []
+        new_internal_urls = []
+        new_external_urls = []
         new_broken_urls = []
+        
         try:
             response = requests.get(cur_url)
         except:
@@ -33,8 +36,6 @@ class WebCrawler():
         
         soup = BeautifulSoup(response.text, "lxml")
         
-        new_internal_urls = []
-        new_external_urls = []
         for link in soup.find_all('a'):
             anchor = link.attrs["href"] if "href" in link.attrs else ''
 
@@ -58,17 +59,19 @@ class WebCrawler():
         return [item for sublist in listi for item in sublist]
         
     def crawl(self):
+        cpu_count = multiprocessing.cpu_count()
+        number_of_cpus_to_use = max(1, cpu_count - 2)
+        
         while self.waiting_urls:
             j = 0
             next_batch_urls = []
-            while j < 6 and self.waiting_urls: 
+            while j < number_of_cpus_to_use and self.waiting_urls: 
                 cur_url = self.waiting_urls.popleft()
                 self.visited_urls.add(cur_url)
                 next_batch_urls.append(cur_url)
                 j += 1
              
-            cpu_count = multiprocessing.cpu_count()
-            number_of_cpus_to_use = max(1, cpu_count - 2)
+            
             pool = multiprocessing.Pool(number_of_cpus_to_use)
             new_urls = pool.map(self.find_all_links, next_batch_urls)
             pool.close()
