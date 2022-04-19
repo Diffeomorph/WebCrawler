@@ -18,11 +18,12 @@ class WebCrawler():
         self.broken_urls = set()
         
     def find_all_links(self, cur_url):
-        found_urls = []
+        new_waiting_urls = []
+        new_broken_urls = []
         try:
             response = requests.get(cur_url)
         except:
-            self.broken_urls.add(cur_url)
+            new_broken_urls.append(cur_url)
         
         parts = urlsplit(cur_url)
         base = "{0.netloc}".format(parts)
@@ -32,25 +33,30 @@ class WebCrawler():
         
         soup = BeautifulSoup(response.text, "lxml")
         
+        new_internal_urls = []
+        new_external_urls = []
         for link in soup.find_all('a'):
             anchor = link.attrs["href"] if "href" in link.attrs else ''
 
             if anchor.startswith('/'):
                 local_link = base_url + anchor
-                self.internal_urls.add(local_link)
-                found_urls.append(local_link)
+                new_internal_urls.append(local_link)
+                new_waiting_urls.append(local_link)
             elif not anchor.startswith('http'):
                 local_link = path + anchor
-                self.internal_urls.add(local_link)
-                found_urls.append(local_link)
+                new_internal_urls.append(local_link)
+                new_waiting_urls.append(local_link)
             elif strip_base in anchor[:30]: #must be found at start of url
-                self.internal_urls.add(anchor)
-                found_urls.append(anchor)
+                new_internal_urls.append(anchor)
+                new_waiting_urls.append(anchor)
             
             else:
-                self.external_urls.add(anchor)
+                new_external_urls.append(anchor)
                 
-        return found_urls
+        return [new_waiting_urls, new_internal_urls, new_external_urls, new_broken_urls]
+    
+    def flatten_links(self, links):
+        return [item for sublist in links for item in sublist]
         
     def crawl(self):
         while self.waiting_urls:
@@ -61,16 +67,34 @@ class WebCrawler():
                 self.visited_urls.add(cur_url)
                 next_batch_urls.append(cur_url)
                 j += 1
-                
-            pool = multiprocessing.Pool(6)
+             
+            cpu_count = multiprocessing.cpu_count()
+            number_of_cpus_to_use = max(1, cpu_count - 2)
+            pool = multiprocessing.Pool(number_of_cpus_to_use)
             new_urls = pool.map(self.find_all_links, next_batch_urls)
             pool.close()
                                 
             print(new_urls)
             print("------------------")
             
-            flat_list_new_urls = [item for sublist in new_urls for item in sublist]
-            for i in list(flat_list_new_urls):
+            all_new_waiting_urls = [x[0] for x in new_urls]
+            all_new_internal_urls = [x[1] for x in new_urls]
+            all_new_external_urls = [x[2] for x in new_urls]
+            all_new_broken_urls = [x[3] for x in new_urls]
+            
+            new_waiting_urls = self.flatten_links(all_new_waiting_urls)
+            new_internal_urls = self.flatten_links(all_new_internal_urls)
+            new_external_urls = self.flatten_links(all_new_external_urls)
+            new_broken_urls = self.flatten_links(all_new_broken_urls)
+            
+            for item1 in new_internal_urls:
+                self.internal_urls.add(item1)
+            for item2 in new_external_urls:
+                self.external_urls.add(item2)
+            for item3 in new_broken_urls:
+                self.broken_urls.add(item3)
+            
+            for i in list(new_waiting_urls):
                 if i not in self.visited_urls and not i in self.waiting_urls:
                     self.waiting_urls.append(i)
                     
