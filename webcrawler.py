@@ -6,7 +6,6 @@ import requests.exceptions
 import collections
 from urllib.parse import urlsplit
 import multiprocessing
-#from collections import defaultdict
 
 
 class WebCrawler():
@@ -125,7 +124,7 @@ class Tree:
             d[value[0]] = Node(value[0])
      
         # represents the root node of tree
-        root = None
+        root_ = None
      
         # traverse the parent list and build the tree
         for i, value in enumerate(parent_child_array):
@@ -133,13 +132,14 @@ class Tree:
             # if the parent is -1, set the root to the current node having the
             # value `i` (stored in map[i])
             if value[1] == -1:
-                root = d[value[0]]
+                root_ = d[value[0]]
             else:
                 # get the parent for the current node
                 ptr = d[value[1]]
                 ptr.children.append(d[value[0]])
-                
-        return root
+        
+        self.root = root_        
+        return
  
         
 
@@ -149,6 +149,5 @@ if __name__ == "__main__":
     webc.crawl()
     
     tree = Tree()
-    root = tree.create_tree(list(webc.internal_urls))
-    tree.create_tree()
+    tree.create_tree(list(webc.internal_urls))
     
