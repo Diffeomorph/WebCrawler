@@ -6,7 +6,7 @@ import requests.exceptions
 import collections
 from urllib.parse import urlsplit
 import multiprocessing
-from collections import defaultdict
+#from collections import defaultdict
 
 
 class WebCrawler():
@@ -103,33 +103,47 @@ class WebCrawler():
     def get_sitemap(self):
         sorted_sitemap = sorted(list(self.internal_urls))
         return sorted_sitemap
-    
-    def create_tree(self, pairs, ROOT = 'https://tomblomfield.com/'):
-        def node(): 
-            return [ROOT,[]]
+
+# A class to store a binary tree node
+class Node:
+    def __init__(self, data):
+        self.data = data
+        self.children = []
         
-        table = defaultdict(node)
-        # Build 2-way mapping between nodes
-        for child, parent in pairs:
-            table[parent][1].append(child)  # parent - > children
-            table[child][0] = parent  # child -> parent
-    
-        def follow(parent, childids):
-            for c in childids:
-                empty = []
-                child = {c: empty}
-                parent.append(child)
-                if c in table:
-                    follow(empty, table[c][1])
-                    
-        # Recursively fill in the tree
-        tree = {ROOT:[]}
-        roots = [k for k,v in table.items() if v[0] == ROOT]
-        follow(tree[ROOT], roots)   
-        return tree
+# Function to build a tree from the given parent list
+class Tree:
+    def __init__(self):
+        self.root = None
+        
+    def createTree(self, parent_child_array):
+        d = {}
+     
+        # create `n` new tree nodes, each having a value from 0 to `n-1`,
+        # and store them in a dictionary
+        for i, value in enumerate(parent_child_array):
+            d[value[0]] = Node(value[0])
+     
+        # represents the root node of tree
+        root = None
+     
+        # traverse the parent list and build the tree
+        for i, value in enumerate(parent_child_array):
+     
+            # if the parent is -1, set the root to the current node having the
+            # value `i` (stored in map[i])
+            if value[1] == -1:
+                root = d[value[0]]
+            else:
+                # get the parent for the current node
+                ptr = d[value[1]]
+                ptr.children.append(d[value[0]])
+                
+        return root
+ 
         
 
 if __name__ == "__main__":
     webc = WebCrawler('https://tomblomfield.com/')
     webc.crawl()
     print(webc.get_sitemap())
+    
