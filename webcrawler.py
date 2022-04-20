@@ -106,12 +106,12 @@ class WebCrawler():
 
 # A class to store a binary tree node
 class Node:
-    def __init__(self, data):
-        self.data = data
+    def __init__(self, url):
+        self.url = url
         self.children = []
         
 # Function to build a tree from the given parent list
-class Tree:
+class NaryTree:
     def __init__(self):
         self.root = None
         
