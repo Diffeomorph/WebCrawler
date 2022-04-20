@@ -9,34 +9,6 @@ import multiprocessing
 from collections import defaultdict
 
 
-ROOT = 'https://tomblomfield.com/'
-
-def create_tree(pairs):
-    
-    def node(): 
-        return [ROOT,[]]
-    
-    table = defaultdict(node)
-    # Build 2-way mapping between nodes
-    for child, parent in pairs:
-        table[parent][1].append(child)  # parent - > children
-        table[child][0] = parent  # child -> parent
-
-    def follow(parent, childids):
-        for c in childids:
-            empty = []
-            child = {c: empty}
-            parent.append(child)
-            if c in table:
-                follow(empty, table[c][1])
-                
-    # Recursively fill in the tree
-    tree = {ROOT:[]}
-    roots = [k for k,v in table.items() if v[0] == ROOT]
-    follow(tree[ROOT], roots)   
-    return tree
-
-
 class WebCrawler():
     
     def __init__(self, start_url):
@@ -132,6 +104,31 @@ class WebCrawler():
         sorted_sitemap = sorted(list(self.internal_urls))
         return sorted_sitemap
     
+    def create_tree(self, pairs, ROOT = 'https://tomblomfield.com/'):
+        def node(): 
+            return [ROOT,[]]
+        
+        table = defaultdict(node)
+        # Build 2-way mapping between nodes
+        for child, parent in pairs:
+            table[parent][1].append(child)  # parent - > children
+            table[child][0] = parent  # child -> parent
+    
+        def follow(parent, childids):
+            for c in childids:
+                empty = []
+                child = {c: empty}
+                parent.append(child)
+                if c in table:
+                    follow(empty, table[c][1])
+                    
+        # Recursively fill in the tree
+        tree = {ROOT:[]}
+        roots = [k for k,v in table.items() if v[0] == ROOT]
+        follow(tree[ROOT], roots)   
+        return tree
+        
+
 if __name__ == "__main__":
     webc = WebCrawler('https://tomblomfield.com/')
     webc.crawl()
