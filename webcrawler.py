@@ -14,9 +14,10 @@ class WebCrawler():
     def __init__(self, start_url):
         self.waiting_urls = collections.deque([(start_url, -1)]) # child, parent
         self.visited_urls = set()
-        self.internal_urls = set()
+        self.internal_urls = set([(start_url, -1),])
         self.external_urls = set()
         self.broken_urls = set()
+        self.internal_urls
         
     def find_all_links(self, cur_url):
         new_waiting_urls = []
@@ -111,11 +112,11 @@ class Node:
         self.children = []
         
 # Function to build a tree from the given parent list
-class NaryTree:
+class Tree:
     def __init__(self):
         self.root = None
         
-    def createTree(self, parent_child_array):
+    def create_tree(self, parent_child_array):
         d = {}
      
         # create `n` new tree nodes, each having a value from 0 to `n-1`,
@@ -143,7 +144,11 @@ class NaryTree:
         
 
 if __name__ == "__main__":
-    webc = WebCrawler('https://tomblomfield.com/')
+    site_url = 'https://tomblomfield.com/'
+    webc = WebCrawler(site_url)
     webc.crawl()
-    print(webc.get_sitemap())
+    
+    tree = Tree()
+    root = tree.create_tree(list(webc.internal_urls))
+    tree.create_tree()
     
