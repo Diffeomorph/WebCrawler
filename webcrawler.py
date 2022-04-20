@@ -6,12 +6,41 @@ import requests.exceptions
 import collections
 from urllib.parse import urlsplit
 import multiprocessing
+from collections import defaultdict
+
+
+ROOT = 'https://tomblomfield.com/'
+
+def create_tree(pairs):
+    
+    def node(): 
+        return [ROOT,[]]
+    
+    table = defaultdict(node)
+    # Build 2-way mapping between nodes
+    for child, parent in pairs:
+        table[parent][1].append(child)  # parent - > children
+        table[child][0] = parent  # child -> parent
+
+    def follow(parent, childids):
+        for c in childids:
+            empty = []
+            child = {c: empty}
+            parent.append(child)
+            if c in table:
+                follow(empty, table[c][1])
+                
+    # Recursively fill in the tree
+    tree = {ROOT:[]}
+    roots = [k for k,v in table.items() if v[0] == ROOT]
+    follow(tree[ROOT], roots)   
+    return tree
 
 
 class WebCrawler():
     
     def __init__(self, start_url):
-        self.waiting_urls = collections.deque([start_url])
+        self.waiting_urls = collections.deque([(start_url, -1)]) # child, parent
         self.visited_urls = set()
         self.internal_urls = set()
         self.external_urls = set()
@@ -66,11 +95,10 @@ class WebCrawler():
             j = 0
             next_batch_urls = []
             while j < number_of_cpus_to_use and self.waiting_urls: 
-                cur_url = self.waiting_urls.popleft()
+                (cur_url, parent) = self.waiting_urls.popleft()
                 self.visited_urls.add(cur_url)
                 next_batch_urls.append(cur_url)
                 j += 1
-             
             
             pool = multiprocessing.Pool(number_of_cpus_to_use)
             new_urls = pool.map(self.find_all_links, next_batch_urls)
@@ -90,7 +118,7 @@ class WebCrawler():
             new_broken_urls = self.flatten_list(all_new_broken_urls)
             
             for i in new_internal_urls:
-                self.internal_urls.add(i)
+                self.internal_urls.add((i,cur_url))
             for j in new_external_urls:
                 self.external_urls.add(j)
             for k in new_broken_urls:
@@ -98,7 +126,7 @@ class WebCrawler():
             
             for url in list(new_waiting_urls):
                 if url not in self.visited_urls and not url in self.waiting_urls:
-                    self.waiting_urls.append(url)
+                    self.waiting_urls.append((url,cur_url))
                     
     def get_sitemap(self):
         sorted_sitemap = sorted(list(self.internal_urls))
