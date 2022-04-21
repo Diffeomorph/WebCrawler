@@ -37,7 +37,7 @@ class DynamicNaryTree:
                 root_ = self.d[value[0]]
             else:
                 # get the parent for the current node
-                ptr =self. d[value[1]]
+                ptr = self.d[value[1]]
                 ptr.children.append(self.d[value[0]])
         
         self.root = root_        
