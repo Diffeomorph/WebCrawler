@@ -4,6 +4,7 @@ import unittest
 import webcrawler as wc
 
 class TestWebCrawler(unittest.TestCase):
+    
     def test_find_all_links(self):
         webc_test = wc.WebCrawler('https://tomblomfield.com/')
         expected = [['https://tomblomfield.com/',
@@ -33,7 +34,7 @@ class TestWebCrawler(unittest.TestCase):
         self.assertEqual(webc_test.flatten_list([[3,4],[5,6,7],[6],[7],[1,1,1]]), [3,4,5,6,7,6,7,1,1,1])
         
     def test_crawl(self):
-        webc_test = wc.WebCrawler('https://tomblomfield.com/about')
+        webc_test = wc.WebCrawler('https://tomblomfield.com/')
         webc_test.crawl()
         expected = list({'http://tomblomfield.com',
  'http://tomblomfield.com/',

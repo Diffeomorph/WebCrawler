@@ -104,8 +104,14 @@ class WebCrawler():
                     self.waiting_urls.append((url,cur_url))
                     
     def get_sitemap(self):
-        sorted_sitemap = sorted(list(self.internal_urls))
-        return sorted_sitemap
+        urls = set()
+        for x,y in self.internal_urls:
+            if x != -1:
+                urls.add(x)
+            if y != -1:
+                urls.add(y)
+        ans = sorted(list(urls))
+        return ans
 
 # A class to store a binary tree node
 class Node:
