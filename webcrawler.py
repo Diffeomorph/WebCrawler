@@ -9,6 +9,9 @@ import multiprocessing
 
 
 class WebCrawler():
+    """
+    Web Crawler Class to crawl a given website and not visit external sites
+    """
     
     def __init__(self, start_url):
         self.waiting_urls = collections.deque([(start_url, -1)]) # child, parent
@@ -114,6 +117,7 @@ class Node:
 class Tree:
     def __init__(self):
         self.root = None
+        self.number_of_nodes = 0
         
     def create_tree(self, parent_child_array):
         d = {}
@@ -140,7 +144,53 @@ class Tree:
         
         self.root = root_        
         return
- 
+    
+    # Function to print the
+    # N-ary tree graphically
+    def print_ntree(self, node, flag,depth,is_last):
+        # Condition when node is None
+        if node == None:
+            return
+           
+        # Loop to print the depths of the
+        # current node
+        for i in range(1, depth):
+            # Condition when the depth
+            # is exploring
+            if flag[i]:
+                print("| ","", "", "", end = "")
+               
+            # Otherwise print
+            # the blank spaces
+            else:
+                print(" ", "", "", "", end = "")
+           
+        # Condition when the current
+        # node is the root node
+        if depth == 0:
+            print(node.url)
+           
+        # Condition when the node is
+        # the last node of
+        # the exploring depth
+        elif is_last:
+            print("+---", node.url)
+               
+            # No more childrens turn it
+            # to the non-exploring depth
+            flag[depth] = False
+        else:
+            print("+---", node.url)
+       
+        it = 0
+        for i in node.children:
+            it+=1
+             
+            # Recursive call for the
+            # children nodes
+            self.print_ntree(i, flag, depth + 1, it == (len(node.children) - 1))
+        flag[depth] = True
+     
         
 
 if __name__ == "__main__":
@@ -150,4 +200,5 @@ if __name__ == "__main__":
     
     tree = Tree()
     tree.create_tree(list(webc.internal_urls))
+    #tree.print_ntree(tree.root, [True]*10**7, 0, False)
     
