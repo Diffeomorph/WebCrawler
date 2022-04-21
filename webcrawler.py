@@ -14,12 +14,11 @@ class WebCrawler():
     """
     
     def __init__(self, start_url):
-        self.waiting_urls = collections.deque([(start_url, -1)]) # child, parent
+        self.waiting_urls = collections.deque([(start_url, -1)]) #(child, parent)
         self.visited_urls = set()
         self.internal_urls = set([(start_url, -1),])
         self.external_urls = set()
         self.broken_urls = set()
-        self.internal_urls
         
     def find_all_links(self, cur_url):
         new_waiting_urls = []

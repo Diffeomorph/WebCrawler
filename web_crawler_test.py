@@ -164,7 +164,7 @@ class TestWebCrawler(unittest.TestCase):
  'https://tomblomfield.com/random',
  'https://tomblomfield.com/rss'})
         
-        self.assertEqual(webc_test.visited_urls, expected)
+        self.assertEqual(list(webc_test.visited_urls), expected)
         
     def test_get_sitemap(self):
         webc_test = wc.WebCrawler('https://tomblomfield.com/')
