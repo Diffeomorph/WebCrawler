@@ -69,8 +69,13 @@ class WebCrawler():
                 
         return [new_waiting_urls, new_internal_urls, new_external_urls, new_broken_urls]
     
-    def flatten_list(self, listi):
-        return [item for sublist in listi for item in sublist]
+    def flatten_list(self, list_of_lists):
+        """
+        Returns
+        -------
+        A single list containing the elements of the given list of lists, ie a flattened list of lists.
+        """
+        return [item for sublist in list_of_lists for item in sublist]
         
     def crawl(self):
         """
