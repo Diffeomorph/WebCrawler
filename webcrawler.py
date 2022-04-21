@@ -6,6 +6,7 @@ import requests.exceptions
 import collections
 from urllib.parse import urlsplit
 import multiprocessing
+import dynamic_nary_tree as dnt
 
 
 class WebCrawler():
@@ -14,13 +15,23 @@ class WebCrawler():
     """
     
     def __init__(self, start_url):
-        self.waiting_urls = collections.deque([(start_url, -1)]) #(child, parent)
+        self.waiting_urls = collections.deque([(start_url, -1)]) #urls waiting to be search in (child, parent) format
         self.visited_urls = set()
         self.internal_urls = set([(start_url, -1),])
         self.external_urls = set()
         self.broken_urls = set()
         
     def find_all_links(self, cur_url):
+        """
+        Parameters
+        ----------
+        cur_url : the page to be searched for links
+
+        Returns
+        -------
+        list of lists of waiting_urls (to be searched), internal_urls, external_urls, broken_urls
+
+        """
         new_waiting_urls = []
         new_internal_urls = []
         new_external_urls = []
@@ -62,6 +73,9 @@ class WebCrawler():
         return [item for sublist in listi for item in sublist]
         
     def crawl(self):
+        """
+        Crawls the given site using a BFS algorithm, and does so using multiprocessing.
+        """
         cpu_count = multiprocessing.cpu_count()
         number_of_cpus_to_use = max(1, cpu_count - 2)
         
@@ -74,6 +88,7 @@ class WebCrawler():
                 next_batch_urls.append(cur_url)
                 j += 1
             
+            # use pool of workers to process multiple links from above simultaneously
             pool = multiprocessing.Pool(number_of_cpus_to_use)
             new_urls = pool.map(self.find_all_links, next_batch_urls)
             pool.close()
@@ -103,6 +118,12 @@ class WebCrawler():
                     self.waiting_urls.append((url,cur_url))
                     
     def get_sitemap(self):
+        """
+        Returns
+        -------
+        ans : list of urls in lexographical order that the given site contains
+
+        """
         urls = set()
         for x,y in self.internal_urls:
             if x != -1:
@@ -112,98 +133,13 @@ class WebCrawler():
         ans = sorted(list(urls))
         return ans
 
-# A class to store a binary tree node
-class Node:
-    def __init__(self, url):
-        self.url = url
-        self.children = []
-        
-# Function to build a tree from the given parent list
-class Tree:
-    def __init__(self):
-        self.root = None
-        self.number_of_nodes = 0
-        
-    def create_tree(self, parent_child_array):
-        d = {}
-     
-        # create `n` new tree nodes, each having a value from 0 to `n-1`,
-        # and store them in a dictionary
-        for i, value in enumerate(parent_child_array):
-            d[value[0]] = Node(value[0])
-     
-        # represents the root node of tree
-        root_ = None
-     
-        # traverse the parent list and build the tree
-        for i, value in enumerate(parent_child_array):
-     
-            # if the parent is -1, set the root to the current node having the
-            # value `i` (stored in map[i])
-            if value[1] == -1:
-                root_ = d[value[0]]
-            else:
-                # get the parent for the current node
-                ptr = d[value[1]]
-                ptr.children.append(d[value[0]])
-        
-        self.root = root_        
-        return
-    
-    # Function to print the
-    # N-ary tree graphically
-    def print_ntree(self, node, flag,depth,is_last):
-        # Condition when node is None
-        if node == None:
-            return
-           
-        # Loop to print the depths of the
-        # current node
-        for i in range(1, depth):
-            # Condition when the depth
-            # is exploring
-            if flag[i]:
-                print("| ","", "", "", end = "")
-               
-            # Otherwise print
-            # the blank spaces
-            else:
-                print(" ", "", "", "", end = "")
-           
-        # Condition when the current
-        # node is the root node
-        if depth == 0:
-            print(node.url)
-           
-        # Condition when the node is
-        # the last node of
-        # the exploring depth
-        elif is_last:
-            print("+---", node.url)
-               
-            # No more childrens turn it
-            # to the non-exploring depth
-            flag[depth] = False
-        else:
-            print("+---", node.url)
-       
-        it = 0
-        for i in node.children:
-            it+=1
-             
-            # Recursive call for the
-            # children nodes
-            self.print_ntree(i, flag, depth + 1, it == (len(node.children) - 1))
-        flag[depth] = True
-     
-        
 
 if __name__ == "__main__":
     site_url = 'https://tomblomfield.com/'
     webc = WebCrawler(site_url)
     webc.crawl()
     
-    tree = Tree()
+    tree = dnt.DynamicNaryTree()
     tree.create_tree(list(webc.internal_urls))
     #tree.print_ntree(tree.root, [True]*10**7, 0, False)
     
