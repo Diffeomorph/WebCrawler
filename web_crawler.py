@@ -39,9 +39,10 @@ class WebCrawler():
         
         try:
             response = requests.get(cur_url)
-        except:
+        except requests.exceptions.HTTPError as e:
             new_broken_urls.append(cur_url)
-        
+            print (e.response.text)
+                
         parts = urlsplit(cur_url)
         base = "{0.netloc}".format(parts)
         strip_base = base.replace("www.", "")
